@@ -1,0 +1,38 @@
+<?php
+/**
+ * @file
+ * This supplies a custom GeoJSON feed.
+ */
+
+/**
+ * Implements hook_menu().
+ *
+ * Define menu items and page callbacks. This hook enables modules to register
+ * paths in order to define how URL requests are handled. Paths may be registered
+ * for URL handling only, or they can register a link to be placed in a menu
+ * (usually the Navigation menu). A path and its associated information is
+ * commonly called a "menu router item". This hook is rarely called (for example,
+ * when modules are enabled), and its results are cached in the database.
+ * hook_menu() implementations return an associative array whose keys define
+ * paths and whose values are an.
+ *
+ * @return
+ *   An array of menu items. Each menu item has a key corresponding to the Drupal
+ *   path being registered. The corresponding array value is an associative array
+ *   that may contain the following key-value pairs: "title": Required. The
+ *   untranslated title of the menu item. "title callback": Function to generate
+ *   the title; defaults to t(). If you require only the raw string to be output,
+ *   set this to FALSE. "title arguments": Arguments to send to t() or your
+ *   custom callback, with path component substitution as described above.
+ */
+function sectionexporter_menu() {
+  $items['sections.geojson'] = array(
+    'title' => 'Section Exportere',
+    'page callback' => 'sectionexporteer_page',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+

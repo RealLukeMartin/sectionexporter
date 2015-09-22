@@ -1,0 +1,4 @@
+name = Section Exporter
+description = Export and convert Sections Content into geojson.
+package = Poetic
+core = 7.x
