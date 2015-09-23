@@ -37,5 +37,29 @@ function sectionexporter_menu() {
 }
 
 function sectionexporter_page() {
-	print "hello there!";
+		print '{' . "\n";
+		print '"type": "FeatureCollection",' . "\n";
+		print '"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },';
+
+		$property_nodes = get_all_property_nodes();
+
+		print_r($property_nodes);
+
+		print 'test';
+
+}
+
+// grab all of the property nodes
+function get_all_property_nodes() {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+        ->entityCondition('bundle', 'property')
+        ->propertyCondition('status', 1);
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $properties_nids = array_keys($result['node']);
+    $property_items = entity_load('node', $property_nids);
+  }
+  return $property_items;
 }
