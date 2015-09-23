@@ -48,7 +48,7 @@ function sectionexporter_page() {
 
 		//Closer
 		print "\n" . ']' . "\n}";
-		//emoji test
+		//more emojis
 }
 
 // grab all of the property nodes
