@@ -37,16 +37,17 @@ function sectionexporter_menu() {
 }
 
 function sectionexporter_page() {
+		//Header
 		print '{' . "\n";
 		print '"type": "FeatureCollection",' . "\n";
 		print '"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },';
 
+		//Body
 		$property_nodes = get_all_property_nodes();
+		se_create_feed($property_nodes);
 
-		print_r($property_nodes);
-
-		print 'test';
-
+		//Closer
+		print "\n" . ']' . "\n}";
 }
 
 // grab all of the property nodes
@@ -58,8 +59,17 @@ function get_all_property_nodes() {
   $result = $query->execute();
 
   if (isset($result['node'])) {
-    $properties_nids = array_keys($result['node']);
-    $property_items = entity_load('node', $property_nids);
+    $property_nids = array_keys($result['node']);
+    $property_items = node_load_multiple($property_nids);
   }
   return $property_items;
+}
+//Build the geojson data
+function se_create_feed($nodes) {
+	$properties_array = array();
+	foreach($nodes as $node) {
+		$lot = $node->field_lot['und'][0]['value'];
+		$section = $node->field_section['und'][0]['value'];
+		print($lot . $section);
+	}
 }
