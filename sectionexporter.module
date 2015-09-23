@@ -26,13 +26,12 @@
  *   custom callback, with path component substitution as described above.
  */
 function sectionexporter_menu() {
-  $items['sections.geojson'] = array(
-    'title' => 'Section Exportere',
-    'page callback' => 'sectionexporteer_page',
+  $items['sections'] = array(
+    'title' => 'Section Exporter',
+    'page callback' => 'sectionexporter_page',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
 
   return $items;
 }
-
