@@ -37,5 +37,7 @@ function sectionexporter_menu() {
 }
 
 function sectionexporter_page() {
-	print "hello there!";
+		print '{' . "\n";
+		print '"type": "FeatureCollection",' . "\n";
+		print '"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },';
 }
