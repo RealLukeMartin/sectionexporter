@@ -48,6 +48,7 @@ function sectionexporter_page() {
 
 		//Closer
 		print "\n" . ']' . "\n}";
+		//emoji test
 }
 
 // grab all of the property nodes
