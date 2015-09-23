@@ -60,7 +60,7 @@ function get_all_property_nodes() {
 
   if (isset($result['node'])) {
     $property_nids = array_keys($result['node']);
-    $property_items = node_load_multiple($property_nids);
+    $property_items = entity_load('node', $property_nids);
   }
   return $property_items;
 }
@@ -68,8 +68,12 @@ function get_all_property_nodes() {
 function se_create_feed($nodes) {
 	$properties_array = array();
 	foreach($nodes as $node) {
+		$address = $node->title;
 		$lot = $node->field_lot['und'][0]['value'];
 		$section = $node->field_section['und'][0]['value'];
-		print($lot . $section);
+		$block = $node->field_block['und'][0]['value'];
+		$coordinates = $node->field_coordinates['und'][0]['value'];
+
+		print($address . " Lot: " . $lot . " Section: " . $section . " Block: " . $block . " Coordinates: " . $coordinates . ", \n");
 	}
 }
