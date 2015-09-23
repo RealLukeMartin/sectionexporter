@@ -40,7 +40,9 @@ function sectionexporter_page() {
 		//Header
 		print '{' . "\n";
 		print '"type": "FeatureCollection",' . "\n";
-		print '"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },';
+		print '"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },' . "\n\n";
+		print '"features": [' . "\n";
+
 
 		//Body
 		$property_nodes = get_all_property_nodes();
@@ -48,7 +50,6 @@ function sectionexporter_page() {
 
 		//Closer
 		print "\n" . ']' . "\n}";
-		//more emojis
 }
 
 // grab all of the property nodes
@@ -75,6 +76,8 @@ function se_create_feed($nodes) {
 		$block = $node->field_block['und'][0]['value'];
 		$coordinates = $node->field_coordinates['und'][0]['value'];
 
-		print($address . " Lot: " . $lot . " Section: " . $section . " Block: " . $block . " Coordinates: " . $coordinates . ", \n");
+		// print($address . " Lot: " . $lot . " Section: " . $section . " Block: " . $block . " Coordinates: " . $coordinates . ", \n");
+
+		print '{ "type": "Feature", "properties": { "Lot": ' . $lot . ' }}' . "\n";
 	}
 }
