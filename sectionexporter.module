@@ -79,10 +79,10 @@ function se_create_feed($nodes) {
 		$block = $node->field_block['und'][0]['value'];
 		$coordinates = $node->field_coordinates['und'][0]['value'];
 
-		$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . $address . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}},' . "\n";
+		$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}},' . "\n";
 
 		if ( $i == $nodes_length - 1 ) {
-			$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . $address . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . "\n";
+			$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . "\n";
 		}
 
 		print $feed_line;
