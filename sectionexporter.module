@@ -70,7 +70,7 @@ function get_all_property_nodes() {
 function se_create_feed($nodes) {
 	$properties_array = array();
 	$nodes_length = count($nodes);
-	$i = 0;
+	$property_count = 0;
 
 	foreach($nodes as $node) {
 		$address = $node->title;
@@ -81,11 +81,11 @@ function se_create_feed($nodes) {
 
 		$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}},' . "\n";
 
-		if ( $i == $nodes_length - 1 ) {
+		if ( $property_count == $nodes_length - 1 ) {
 			$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . "\n";
 		}
 
 		print $feed_line;
-		$i++;
+		$property_count++;
 	}
 }
