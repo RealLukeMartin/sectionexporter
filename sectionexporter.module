@@ -35,23 +35,19 @@ function sectionexporter_menu() {
 
   return $items;
 }
-
+//Create page callback
 function sectionexporter_page() {
 		//Header
 		print '{' . "\n";
 		print '"type": "FeatureCollection",' . "\n";
 		print '"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },' . "\n\n";
 		print '"features": [' . "\n";
-
-
 		//Body
 		$property_nodes = get_all_property_nodes();
 		se_create_feed($property_nodes);
-
 		//Closer
 		print ']' . "\n}";
 }
-
 // grab all of the property nodes
 function get_all_property_nodes() {
   $query = new EntityFieldQuery();
@@ -71,20 +67,18 @@ function se_create_feed($nodes) {
 	$properties_array = array();
 	$nodes_length = count($nodes);
 	$property_count = 0;
-
+	//loop through each node
 	foreach($nodes as $node) {
 		$address = $node->title;
 		$lot = $node->field_lot['und'][0]['value'];
 		$section = $node->field_section['und'][0]['value'];
 		$block = $node->field_block['und'][0]['value'];
 		$coordinates = $node->field_coordinates['und'][0]['value'];
-
 		$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}},' . "\n";
-
+		//last item doesn't need a comma at end
 		if ( $property_count == $nodes_length - 1 ) {
 			$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . "\n";
 		}
-
 		print $feed_line;
 		$property_count++;
 	}
