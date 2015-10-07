@@ -25,6 +25,7 @@
  *   set this to FALSE. "title arguments": Arguments to send to t() or your
  *   custom callback, with path component substitution as described above.
  */
+
 function sectionexporter_menu() {
   $items['sections.geojson'] = array(
     'title' => 'Section Exporter',
@@ -37,6 +38,7 @@ function sectionexporter_menu() {
 }
 //Create page callback
 function sectionexporter_page() {
+		// drupal_add_http_header('Content-Type', 'application/javascript; utf-8');
 		//Header
 		print '{' . "\n";
 		print '"type": "FeatureCollection",' . "\n";
@@ -44,7 +46,8 @@ function sectionexporter_page() {
 		print '"features": [' . "\n";
 		//Body
 		$property_nodes = get_all_property_nodes();
-		se_create_feed($property_nodes);
+		$home_nodes = get_all_home_nodes();
+		se_create_feed($property_nodes, $home_nodes);
 		//Closer
 		print ']' . "\n}";
 }
@@ -53,6 +56,10 @@ function get_all_property_nodes() {
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')
         ->entityCondition('bundle', 'property')
+        ->fieldCondition('field_section', 'value', 'NULL', '!=')
+        ->fieldCondition('field_block', 'value', 'NULL', '!=')
+        ->fieldCondition('field_coordinates', 'value', 'NULL', '!=')
+        ->fieldCondition('field_lot', 'value', 'NULL', '!=')
         ->propertyCondition('status', 1);
   $result = $query->execute();
 
@@ -62,24 +69,57 @@ function get_all_property_nodes() {
   }
   return $property_items;
 }
+// grab all of the home nodes
+function get_all_home_nodes() {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+        ->entityCondition('bundle', 'home')
+        ->fieldCondition('field_bedrooms', 'value', 'NULL', '!=')
+        ->propertyCondition('status', 1);
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $home_nids = array_keys($result['node']);
+    $home_items = entity_load('node', $home_nids);
+  }
+  return $home_items;
+}
 //Build the geojson data
-function se_create_feed($nodes) {
+function se_create_feed($nodes, $ref_nodes) {
 	$properties_array = array();
 	$nodes_length = count($nodes);
 	$property_count = 0;
 	//loop through each node
 	foreach($nodes as $node) {
+		
 		$address = $node->title;
 		$lot = $node->field_lot['und'][0]['value'];
 		$section = $node->field_section['und'][0]['value'];
 		$block = $node->field_block['und'][0]['value'];
 		$coordinates = $node->field_coordinates['und'][0]['value'];
-		$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}},' . "\n";
-		//last item doesn't need a comma at end
-		if ( $property_count == $nodes_length - 1 ) {
-			$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . "\n";
+		$reference_nid = $node->field_home['und'][0]['target_id'];
+
+
+		//loop through each ref_node
+		foreach($ref_nodes as $ref_node) {
+			$beds = $ref_node->field_bedrooms['und'][0]['value'];
+			$baths = $ref_node->field_bathrooms['und'][0]['value'];
+			$ref_address = $ref_node->title;
+			$current_ref_nid = $ref_node->nid;
+
+			if (!isset($node->field_home['und'][0]['target_id'])) {
+				if( $ref_address == $address ) {
+					$reference_nid = $current_ref_nid;
+				}
+			}
+
+			if ( $reference_nid == $current_ref_nid ) {	
+				$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ', "Beds": ' . $beds . ', "Baths":' . $baths . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . ',' . "\n";		
+				print $feed_line;
+			}
 		}
-		print $feed_line;
+
+
 		$property_count++;
 	}
 }
