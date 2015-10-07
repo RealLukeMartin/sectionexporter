@@ -86,7 +86,7 @@ function get_all_home_nodes() {
 }
 //Build the geojson data
 function se_create_feed($nodes, $ref_nodes) {
-	$properties_array = array();
+	$feeds = array();
 	$nodes_length = count($nodes);
 	$property_count = 0;
 	//loop through each node
@@ -97,29 +97,39 @@ function se_create_feed($nodes, $ref_nodes) {
 		$section = $node->field_section['und'][0]['value'];
 		$block = $node->field_block['und'][0]['value'];
 		$coordinates = $node->field_coordinates['und'][0]['value'];
-		$reference_nid = $node->field_home['und'][0]['target_id'];
-
-
-		//loop through each ref_node
-		foreach($ref_nodes as $ref_node) {
-			$beds = $ref_node->field_bedrooms['und'][0]['value'];
-			$baths = $ref_node->field_bathrooms['und'][0]['value'];
+		$node_id = $node->nid;
+		//Loop Through each ref_node
+		foreach( $ref_nodes as $ref_node ) {
+			//Set up variables for ref_node
 			$ref_address = $ref_node->title;
-			$current_ref_nid = $ref_node->nid;
-
-			if (!isset($node->field_home['und'][0]['target_id'])) {
-				if( $ref_address == $address ) {
-					$reference_nid = $current_ref_nid;
-				}
-			}
-
-			if ( $reference_nid == $current_ref_nid ) {	
-				$feed_line = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ', "Beds": ' . $beds . ', "Baths":' . $baths . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}' . ',' . "\n";		
-				print $feed_line;
+			$ref_id = $ref_node->nid;
+			//Check if address matches a home(ref_node)
+			if ( $address == $ref_address ) {
+				$node_l = node_load($node_id);
+				$node_l->field_home['und'][0]['target_id'] = $ref_id;
+				field_attach_update('node', $node_l);
+				$feeds[$property_count] = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}';
+				break;
 			}
 		}
-
+		$feeds[$property_count] = '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}';
 
 		$property_count++;
+	}
+	//print the feed
+	_print_feeds($feeds);
+}
+//Helper function to print feed data
+function _print_feeds($feeds) {
+	$feeds_count = 0;
+	$feeds_length = count($feeds);
+	foreach($feeds as $feed) {
+		if ( $feeds_count == $feeds_length - 1 ) {
+			print $feed;
+		}
+		else {
+			print $feed . ',' . "\n";
+			$feeds_count++;
+		}
 	}
 }
