@@ -75,6 +75,8 @@ function get_all_home_nodes() {
   $query->entityCondition('entity_type', 'node')
         ->entityCondition('bundle', 'home')
         ->fieldCondition('field_bedrooms', 'value', 'NULL', '!=')
+        //->fieldCondition('field_available', 'value', 'NULL', '!=')
+        //->fieldCondition('field_sold', 'value', 'NULL', '!=')
         ->propertyCondition('status', 1);
   $result = $query->execute();
 
@@ -106,6 +108,7 @@ function se_create_feed($nodes, $ref_nodes) {
 		$price = '"Lot"';
 		$link = '/';
 		$lot_size = "50";
+		$status = "Lot";
 
 		//Loop Through each ref_node
 		foreach( $ref_nodes as $ref_node ) {
@@ -129,11 +132,22 @@ function se_create_feed($nodes, $ref_nodes) {
 				$link = '/homes/' . str_replace(" ", "-", $ref_address);
 				$image = file_create_url($ref_node->field_home_gallery_images['und'][0]['uri']);
 				$lot_size = $ref_node->field_lot_size['und'][0]['value'];
-				$feeds[$property_count] = _print_feed_item($lot, $address, $block, $section, $beds, $baths, $price, $link, $image, $lot_size, $coordinates);
+				$status = 'Available';
+				$sold = $ref_node->field_sold['und'][0]['value'];
+
+				if ( $sold == 1 ) {
+					$status = 'Sold';
+				}
+				else {
+					$status = 'Available';
+				}
+
+				$feeds[$property_count] = _print_feed_item($lot, $address, $block, $section, $beds, $baths, $price, $link, $image, $lot_size, $status, $coordinates);
+
 				break;
 			}
 		}
-		$feeds[$property_count] = _print_feed_item($lot, $address, $block, $section, $beds, $baths, $price, $link, $image, $lot_size, $coordinates);
+		$feeds[$property_count] = _print_feed_item($lot, $address, $block, $section, $beds, $baths, $price, $link, $image, $lot_size, $status, $coordinates);
 
 		$property_count++;
 	}
@@ -148,8 +162,8 @@ function price_format($num) {
 	return '"$' . $num_string . '"';
 }
 //Helper functions to print feed data
-function _print_feed_item($lot, $address, $block, $section, $beds, $baths, $price, $link, $image, $lot_size, $coordinates) {
-	return '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ', "Beds": ' . $beds . ', "Baths": ' . $baths . ', "Price": ' . $price . ', "Link": "' . $link . '" ' . ', "Image": "' . $image .'" ' . ', "LotSize": ' . $lot_size . ' }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}';
+function _print_feed_item($lot, $address, $block, $section, $beds, $baths, $price, $link, $image, $lot_size, $status, $coordinates) {
+	return '{ "type": "Feature", "properties": { "Lot": ' . $lot . ', "Address": ' . '"' . $address . '"' . ', "Block": ' . $block . ', "Section": ' . $section . ', "Beds": ' . $beds . ', "Baths": ' . $baths . ', "Price": ' . $price . ', "Link": "' . $link . '" ' . ', "Image": "' . $image .'" ' . ', "LotSize": ' . $lot_size . ', "Status": "' . $status . '" }' . ', "geometry": { "type": "Polygon", "coordinates": [[' . $coordinates . ']]}}';
 }
 
 function _print_all_feed_items($feeds) {
