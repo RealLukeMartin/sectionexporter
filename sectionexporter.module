@@ -75,7 +75,7 @@ function get_all_home_nodes() {
   $query->entityCondition('entity_type', 'node')
         ->entityCondition('bundle', 'home')
         ->fieldCondition('field_bedrooms', 'value', 'NULL', '!=')
-        //->fieldCondition('field_available', 'value', 'NULL', '!=')
+        ->fieldCondition('field_available', 'value', 'NULL', '!=')
         //->fieldCondition('field_sold', 'value', 'NULL', '!=')
         ->propertyCondition('status', 1);
   $result = $query->execute();
@@ -95,6 +95,8 @@ function se_create_feed($nodes, $ref_nodes) {
 	foreach($nodes as $node) {
 		
 		$address = $node->title;
+		$address_cap = strtoupper($address);
+		$address_sanitize = sanitize_address($address);
 		$lot = $node->field_lot['und'][0]['value'];
 		$section = $node->field_section['und'][0]['value'];
 		$block = $node->field_block['und'][0]['value'];
@@ -107,18 +109,21 @@ function se_create_feed($nodes, $ref_nodes) {
 		$node_id = $node->nid;
 		$price = '"Lot"';
 		$link = '/';
-		$lot_size = "50";
+		$lot_size = 50;
 		$status = "Lot";
+
 
 		//Loop Through each ref_node
 		foreach( $ref_nodes as $ref_node ) {
 			//Set up variables for ref_node
 			$ref_address = $ref_node->title;
+			$ref_address_cap = strtoupper($ref_address);
+			$ref_address_sanitize = sanitize_address($ref_address);
 			$ref_id = $ref_node->nid;
 			$field_home = $node->field_home['und'][0]['target_id'];
 			//(Initial) Check the lots to see if any need to be homes
 			if ( $field_home == $lot_default ) {
-				if ( $address == $ref_address ) {
+				if ( $address_sanitize == $ref_address_sanitize ) {
 					$node_l = node_load($node_id);
 					$node_l->field_home['und'][0]['target_id'] = $ref_id;
 					$field_home = $ref_id;
@@ -126,17 +131,22 @@ function se_create_feed($nodes, $ref_nodes) {
 				}
 			}
 			if ( $field_home == $ref_id ) {
+				$address = $ref_address;
 				$beds = $ref_node->field_bedrooms['und'][0]['value'];
 				$baths = $ref_node->field_bathrooms['und'][0]['value'];
 				$price = isset($ref_node->field_price['und'][0]['value']) ? price_format($ref_node->field_price['und'][0]['value']) :  '"N/A"';
 				$link = '/homes/' . str_replace(" ", "-", $ref_address);
 				$image = file_create_url($ref_node->field_home_gallery_images['und'][0]['uri']);
 				$lot_size = $ref_node->field_lot_size['und'][0]['value'];
-				$status = 'Available';
+				//$status = 'Available';
+				$status = $ref_node->field_available['und'][0]['value'];
 				$sold = $ref_node->field_sold['und'][0]['value'];
 
 				if ( $sold == 1 ) {
 					$status = 'Sold';
+				}
+				else if ($status == 'Model') {
+					$status = 'Model';
 				}
 				else {
 					$status = 'Available';
@@ -154,6 +164,13 @@ function se_create_feed($nodes, $ref_nodes) {
 	//print the feed
 	_print_all_feed_items($feeds);
 }
+//Address Sanitization
+ function sanitize_address($string) {
+   $address_array = explode(' ', $string, 3);
+   $string_chop = $address_array[0] . $address_array[1];
+
+   return $string_chop;
+ }
 
 function price_format($num) {
 	$num_format = number_format($num);
